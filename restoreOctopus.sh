@@ -42,7 +42,27 @@ sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost
 sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE FILELISTONLY FROM DISK = '/var/opt/mssql/backup/$db_master'"  | tr -s ' ' | cut -d ' ' -f 1-2
 sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE FILELISTONLY FROM DISK = '/var/opt/mssql/backup/$db_model'"  | tr -s ' ' | cut -d ' ' -f 1-2
 sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE FILELISTONLY FROM DISK = '/var/opt/mssql/backup/$db_msdb'"  | tr -s ' ' | cut -d ' ' -f 1-2
-sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE FILELISTONLY FROM DISK = '/var/opt/mssql/backup/$db_temp'"  | tr -s ' ' | cut -d ' ' -f 1-2
+
+
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "USE master"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE OctopusDeploy SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE model SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE msdb SET SINGLE_USER WITH ROLLBACK IMMEDIATE"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "GO"
+
+
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE DATABASE OctopusDeploy FROM DISK = '/var/opt/mssql/backup/$db_octopus' WITH REPLACE, MOVE 'OctopusDeploy' TO '/var/opt/mssql/data/OctopusDeploy.mdf', MOVE 'OctopusDeploy_log' TO '/var/opt/mssql/data/OctopusDeploy_log.ldf'"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "GO"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE DATABASE master FROM DISK = '/var/opt/mssql/backup/$db_master' WITH REPLACE, MOVE 'master' TO '/var/opt/mssql/data/master.mdf', MOVE 'mastlog' TO '/var/opt/mssql/data/mastlog.ldf'"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "GO"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE DATABASE model FROM DISK = '/var/opt/mssql/backup/$db_model' WITH REPLACE, MOVE 'modeldev' TO '/var/opt/mssql/data/model.mdf', MOVE 'modellog' TO '/var/opt/mssql/data/modellog.ldf'"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "GO"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "RESTORE DATABASE msdb FROM DISK = '/var/opt/mssql/backup/$db_msdb' WITH REPLACE, MOVE 'MSDBData' TO '/var/opt/mssql/data/MSDBData.mdf', MOVE 'MSDBLog' TO '/var/opt/mssql/data/MSDBLog.ldf'"
+
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE OctopusDeploy SET MULTI_USER"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE model SET MULTI_USER"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "ALTER DATABASE msdb SET MULTI_USER"
+sudo docker exec -it $db_container_name /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'N0tS3cr3t!' -Q "GO"
 
 docker restart $db_container_name
 docker restart $octopus_container_name
